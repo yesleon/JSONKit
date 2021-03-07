@@ -18,7 +18,7 @@ final class JSONKitTests: XCTestCase {
             """
         let b = try aString.data(using: .utf8)!.toJSONData()
         let z = try b.cast(as: [String: Any].self)
-        print(try b.stringified())
+//        print(try b.stringified())
         XCTAssertEqual(
             try b["asdf"][2].cast(),
             "77"
@@ -32,6 +32,28 @@ final class JSONKitTests: XCTestCase {
             try b["asdf"][2].cast(as: String.self),
             try b.getDescendant(by: ["asdf", .index(2)]).cast(as: String.self)
         )
+    }
+    
+    func test2() throws {
+        let subscription: JSONData = [
+            "action": "sub",
+            "subscriptions": [
+                ["channel": "book", "market": "btctwd", "depth": 1],
+                ["channel": "trade", "market": "btctwd"],
+                ["channel": "ticker", "market": "btctwd"]
+            ]
+        ]
+        
+        let subscriptionString = try subscription.stringified()
+        print(subscriptionString)
+        let newData = try subscriptionString.toJSONData()
+        let a = try newData.cast(as: [String: Any].self)
+        let aString = try a.stringified()
+    }
+    
+    func test3() throws {
+        let a = try "3".toJSONData()
+        print(a)
     }
 
     static var allTests = [

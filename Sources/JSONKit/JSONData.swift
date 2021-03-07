@@ -38,44 +38,26 @@ public extension String {
     }
 }
 
-public protocol JSONStringifiable {
-    func stringified() throws -> String
+public protocol JSONStringifiable { }
+public extension JSONStringifiable where Self: JSONData {
+    func stringified() throws -> String {
+        let data = try JSONSerialization.data(withJSONObject: self, options: [.fragmentsAllowed, .prettyPrinted])
+        return String(data: data, encoding: .utf8)!
+    }
 }
 
 public typealias JSONData = JSONMemberAccessing & JSONCasting & JSONStringifiable
 
 extension String: JSONData {
-    public func stringified() throws -> String {
-        return "\"\(self)\""
-    }
 }
 
 extension Bool: JSONData {
-    public func stringified() throws -> String {
-        return self ? "true" : "false"
-    }
 }
 
 extension Int: JSONData {
-    public func stringified() throws -> String {
-        return "\(self)"
-    }
 }
 
 extension Dictionary: JSONData where Key == String {
-    
-    public func stringified() throws -> String {
-        var string = "{"
-        if !self.isEmpty {
-            try self.forEach { key, value in
-                let value = try castAsJSONData(value).get()
-                try string += key.stringified() + ": " + value.stringified() + ","
-            }
-            string.removeLast()
-        }
-        string += "}"
-        return string
-    }
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
@@ -92,18 +74,6 @@ extension Dictionary: JSONData where Key == String {
 }
 
 extension Array: JSONData {
-    public func stringified() throws -> String {
-        var string = "["
-        if !self.isEmpty {
-            try self.forEach { element in
-                let element = try castAsJSONData(element).get()
-                try string += element.stringified() + ","
-            }
-            string.removeLast()
-        }
-        string += "]"
-        return string
-    }
     
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
@@ -122,13 +92,6 @@ extension Array: JSONData {
 }
 
 extension Optional: JSONData where Wrapped == JSONData {
-    public func stringified() throws -> String {
-        if let self = self {
-            return try self.stringified()
-        }
-        return "null"
-    }
-    
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         if let value = self {

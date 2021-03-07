@@ -5,7 +5,7 @@
 //  Created by Li-Heng Hsu on 2021/3/8.
 //
 
-import Foundation
+
 
 public protocol JSONCasting {
     func cast<T: JSONData>(as type: T.Type) throws -> T

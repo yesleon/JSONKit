@@ -64,6 +64,7 @@ public extension JSONMemberAccessing where Self: JSONData {
 }
 
 
+
 extension Result: JSONMemberAccessing where Success == JSONData, Failure == JSONError {
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
@@ -74,6 +75,9 @@ extension Result: JSONMemberAccessing where Success == JSONData, Failure == JSON
             return self.flatMap { $0.getMember(by: .key(key)) }
         }
     }
+}
+
+extension Result: JSONCasting where Success == JSONData {
     
     public func cast<T: JSONData>(as type: T.Type = T.self) throws -> T {
         let content = try get()
@@ -83,3 +87,4 @@ extension Result: JSONMemberAccessing where Success == JSONData, Failure == JSON
         return value
     }
 }
+
