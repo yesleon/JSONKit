@@ -7,13 +7,20 @@ final class JSONKitTests: XCTestCase {
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
         
-        let a = [
-            "asdf": ["dd", "gg", "77"]
+        let a: [String : Any] = [
+            "asdf": ["dd", "gg", "77"],
+            "FFF": true
         ]
-        let b = a as Data
+        let aString = """
+            {
+                "asdf": ["dd", "gg", "77"]
+            }
+            """
+        let b = try aString.data(using: .utf8)!.toJSONData()
+        let z = try b.cast(as: [String: Any].self)
         
         XCTAssertEqual(
-            try b["asdf"][2].get(),
+            try b["asdf"][2].cast(),
             "77"
         )
         
@@ -22,8 +29,8 @@ final class JSONKitTests: XCTestCase {
         )
         
         XCTAssertEqual(
-            try b["asdf"][2].get(as: String.self),
-            try b[["asdf", .index(2)]].get(as: String.self)
+            try b["asdf"][2].cast(as: String.self),
+            try b[["asdf", .index(2)]].cast(as: String.self)
         )
     }
 

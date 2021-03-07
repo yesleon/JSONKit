@@ -9,18 +9,18 @@
 
 
 
-enum MemberAccessor {
+enum JSONAccessor {
     case index(Int), key(String)
 }
 
-extension MemberAccessor: ExpressibleByStringLiteral {
+extension JSONAccessor: ExpressibleByStringLiteral {
     
     init(stringLiteral value: String) {
         self = .key(value)
     }
 }
 
-extension MemberAccessor: ExpressibleByIntegerLiteral {
+extension JSONAccessor: ExpressibleByIntegerLiteral {
     
     init(integerLiteral value: Int) {
         self = .index(value)
