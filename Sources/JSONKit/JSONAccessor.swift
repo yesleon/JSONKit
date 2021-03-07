@@ -31,7 +31,7 @@ public protocol JSONMemberAccessing {
     func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError>
 }
 
-extension JSONMemberAccessing {
+public extension JSONMemberAccessing {
     
     subscript(index: Int) -> Result<JSONData, JSONError> {
         return getMember(by: .index(index))
@@ -42,9 +42,9 @@ extension JSONMemberAccessing {
     }
 }
 
-extension JSONMemberAccessing where Self: JSONData {
+public extension JSONMemberAccessing where Self: JSONData {
     
-    public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
+    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
         case .index:
             return .failure(.doesNotSupportSubscriptByIndex(self))
