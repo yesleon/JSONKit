@@ -7,8 +7,22 @@
 
 
 
-typealias AccessorPath = Array<Accessor>
+
 
 enum Accessor {
     case index(Int), key(String)
+}
+
+extension Accessor: ExpressibleByStringLiteral {
+    
+    init(stringLiteral value: String) {
+        self = .key(value)
+    }
+}
+
+extension Accessor: ExpressibleByIntegerLiteral {
+    
+    init(integerLiteral value: Int) {
+        self = .index(value)
+    }
 }

@@ -22,6 +22,15 @@ extension ValueType {
         return getMember(by: .key(key))
     }
     
+    subscript(path: [Accessor]) -> Result<ValueType, Error> {
+        var value = Result<ValueType, Error>.success(self)
+        
+        path.forEach { accessor in
+            value = value.getMember(by: accessor)
+        }
+        return value
+    }
+    
     func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
         switch accessor {
         case .index:
@@ -35,11 +44,20 @@ extension ValueType {
 extension Result where Success == ValueType, Failure == Error {
     
     subscript(index: Int) -> Result<ValueType, Error> {
-        return self.flatMap { $0.getMember(by: .index(index)) }
+        return self.getMember(by: .index(index))
     }
     
     subscript(key: String) -> Result<ValueType, Error> {
-        return self.flatMap { $0.getMember(by: .key(key)) }
+        return self.getMember(by: .key(key))
+    }
+    
+    func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
+        switch accessor {
+        case .index(let index):
+            return self.flatMap { $0.getMember(by: .index(index)) }
+        case .key(let key):
+            return self.flatMap { $0.getMember(by: .key(key)) }
+        }
     }
     
     func get<T: ValueType>(as type: T.Type = T.self) throws -> T {

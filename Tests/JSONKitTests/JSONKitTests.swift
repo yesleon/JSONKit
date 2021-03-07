@@ -11,13 +11,19 @@ final class JSONKitTests: XCTestCase {
             "asdf": ["dd", "gg", "77"]
         ]
         
-        XCTAssertTrue(try b["asdf"][2].get() == "77")
+        XCTAssertEqual(
+            try b["asdf"][2].get(),
+            "77"
+        )
         
-        let e = b[3]
-        XCTAssertThrowsError(try e.get())
-//        let f = b[4]
+        XCTAssertThrowsError(
+            try b[3].get()
+        )
         
-        let g = try b["asdf"][2].get(as: String.self)
+        XCTAssertEqual(
+            try b["asdf"][2].get(as: String.self),
+            try b[["asdf", .index(2)]].get(as: String.self)
+        )
     }
 
     static var allTests = [
