@@ -6,7 +6,7 @@
 //
 
 
-enum JSONError: Swift.Error {
+public enum JSONError: Swift.Error {
     case doesNotSupportSubscriptByIndex(JSONData)
     case doesNotSupportSubscriptByKey(JSONData)
     case typeDoesNotMatch(JSONData)

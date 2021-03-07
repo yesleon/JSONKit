@@ -24,19 +24,19 @@ func castAsJSONData(_ object: Any) -> Result<JSONData, JSONError> {
     }
 }
 
-extension Foundation.Data {
+public extension Foundation.Data {
     func toJSONData() throws -> JSONData {
         let object = try JSONSerialization.jsonObject(with: self, options: .allowFragments)
         return try castAsJSONData(object).get()
     }
 }
 
-protocol JSONData {
+public protocol JSONData {
     func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError>
     func cast<T: JSONData>(as type: T.Type) throws -> T
 }
 
-extension JSONData {
+public extension JSONData {
     
     subscript(index: Int) -> Result<JSONData, JSONError> {
         return getMember(by: .index(index))
@@ -72,7 +72,7 @@ extension JSONData {
 
 extension Result: JSONData where Success == JSONData, Failure == JSONError {
     
-    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
+    public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
         case .index(let index):
             return self.flatMap { $0.getMember(by: .index(index)) }
@@ -81,7 +81,7 @@ extension Result: JSONData where Success == JSONData, Failure == JSONError {
         }
     }
     
-    func cast<T: JSONData>(as type: T.Type = T.self) throws -> T {
+    public func cast<T: JSONData>(as type: T.Type = T.self) throws -> T {
         let content = try get()
         guard let value = content as? T else {
             throw JSONError.typeDoesNotMatch(content)
@@ -98,7 +98,7 @@ extension Int: JSONData { }
 
 extension Dictionary: JSONData where Key == String {
     
-    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
+    public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
         case .index:
             return .failure(.doesNotSupportSubscriptByIndex(self))
@@ -114,7 +114,7 @@ extension Dictionary: JSONData where Key == String {
 
 extension Array: JSONData {
     
-    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
+    public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
         case .index(let index):
             let member = self[index]
@@ -128,7 +128,7 @@ extension Array: JSONData {
 
 extension Optional: JSONData where Wrapped == JSONData {
     
-    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
+    public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         if let value = self {
             return value.getMember(by: accessor)
         } else {
