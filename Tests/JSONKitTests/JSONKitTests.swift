@@ -7,12 +7,17 @@ final class JSONKitTests: XCTestCase {
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
         
-        let b: JSONType = [
+        let b: ValueType = [
             "asdf": ["dd", "gg", "77"]
         ]
-        let c = b["asdf"]?[2]
         
+        XCTAssertTrue(try b["asdf"][2].get() == "77")
         
+        let e = b[3]
+        XCTAssertThrowsError(try e.get())
+//        let f = b[4]
+        
+        let g = try b["asdf"][2].get(as: String.self)
     }
 
     static var allTests = [
