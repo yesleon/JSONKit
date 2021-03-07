@@ -24,10 +24,17 @@ func castAsJSONData(_ object: Any) -> Result<JSONData, JSONError> {
     }
 }
 
-public extension Foundation.Data {
+public extension Data {
     func toJSONData() throws -> JSONData {
         let object = try JSONSerialization.jsonObject(with: self, options: .allowFragments)
         return try castAsJSONData(object).get()
+    }
+}
+
+public extension String {
+    func toJSONData() throws -> JSONData {
+        let data = self.data(using: .utf8)!
+        return try data.toJSONData()
     }
 }
 
