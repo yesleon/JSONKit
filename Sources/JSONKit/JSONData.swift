@@ -38,72 +38,44 @@ public extension String {
     }
 }
 
-public protocol JSONData {
-    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError>
-    func cast<T: JSONData>(as type: T.Type) throws -> T
+public protocol JSONStringifiable {
+    func stringified() throws -> String
 }
 
-public extension JSONData {
-    
-    subscript(index: Int) -> Result<JSONData, JSONError> {
-        return getMember(by: .index(index))
-    }
-    
-    subscript(key: String) -> Result<JSONData, JSONError> {
-        return getMember(by: .key(key))
-    }
-    
-    subscript(path: [JSONAccessor]) -> Result<JSONData, JSONError> {
-        var value = Result<JSONData, JSONError>.success(self)
-        
-        path.forEach { accessor in
-            value = value.getMember(by: accessor)
-        }
-        return value
-    }
-    
-    func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
-        switch accessor {
-        case .index:
-            return .failure(.doesNotSupportSubscriptByIndex(self))
-        case .key:
-            return .failure(.doesNotSupportSubscriptByKey(self))
-        }
-    }
-    
-    func cast<T: JSONData>(as type: T.Type = T.self) throws -> T {
+public typealias JSONData = JSONMemberAccessing & JSONCasting & JSONStringifiable
 
-        return try castAsJSONData(self).cast(as: T.self)
+extension String: JSONData {
+    public func stringified() throws -> String {
+        return "\"\(self)\""
     }
 }
 
-extension Result: JSONData where Success == JSONData, Failure == JSONError {
-    
-    public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
-        switch accessor {
-        case .index(let index):
-            return self.flatMap { $0.getMember(by: .index(index)) }
-        case .key(let key):
-            return self.flatMap { $0.getMember(by: .key(key)) }
-        }
-    }
-    
-    public func cast<T: JSONData>(as type: T.Type = T.self) throws -> T {
-        let content = try get()
-        guard let value = content as? T else {
-            throw JSONError.typeDoesNotMatch(content)
-        }
-        return value
+extension Bool: JSONData {
+    public func stringified() throws -> String {
+        return self ? "true" : "false"
     }
 }
 
-extension String: JSONData { }
-
-extension Bool: JSONData { }
-
-extension Int: JSONData { }
+extension Int: JSONData {
+    public func stringified() throws -> String {
+        return "\(self)"
+    }
+}
 
 extension Dictionary: JSONData where Key == String {
+    
+    public func stringified() throws -> String {
+        var string = "{"
+        if !self.isEmpty {
+            try self.forEach { key, value in
+                let value = try castAsJSONData(value).get()
+                try string += key.stringified() + ": " + value.stringified() + ","
+            }
+            string.removeLast()
+        }
+        string += "}"
+        return string
+    }
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
@@ -120,6 +92,19 @@ extension Dictionary: JSONData where Key == String {
 }
 
 extension Array: JSONData {
+    public func stringified() throws -> String {
+        var string = "["
+        if !self.isEmpty {
+            try self.forEach { element in
+                let element = try castAsJSONData(element).get()
+                try string += element.stringified() + ","
+            }
+            string.removeLast()
+        }
+        string += "]"
+        return string
+    }
+    
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
@@ -137,6 +122,13 @@ extension Array: JSONData {
 }
 
 extension Optional: JSONData where Wrapped == JSONData {
+    public func stringified() throws -> String {
+        if let self = self {
+            return try self.stringified()
+        }
+        return "null"
+    }
+    
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         if let value = self {
@@ -146,4 +138,3 @@ extension Optional: JSONData where Wrapped == JSONData {
         }
     }
 }
-

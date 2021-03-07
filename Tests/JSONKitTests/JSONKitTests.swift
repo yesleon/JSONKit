@@ -18,7 +18,7 @@ final class JSONKitTests: XCTestCase {
             """
         let b = try aString.data(using: .utf8)!.toJSONData()
         let z = try b.cast(as: [String: Any].self)
-        
+        print(try b.stringified())
         XCTAssertEqual(
             try b["asdf"][2].cast(),
             "77"
@@ -30,7 +30,7 @@ final class JSONKitTests: XCTestCase {
         
         XCTAssertEqual(
             try b["asdf"][2].cast(as: String.self),
-            try b[["asdf", .index(2)]].cast(as: String.self)
+            try b.getDescendant(by: ["asdf", .index(2)]).cast(as: String.self)
         )
     }
 
