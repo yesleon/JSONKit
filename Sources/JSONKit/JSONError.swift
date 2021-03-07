@@ -11,4 +11,5 @@ public enum JSONError: Swift.Error {
     case doesNotSupportSubscriptByKey(JSONData)
     case typeDoesNotMatch(JSONData)
     case memberIsNotJSONType(Any)
+    case indexOutOfBound(Array<Any>)
 }

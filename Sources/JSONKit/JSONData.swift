@@ -124,6 +124,9 @@ extension Array: JSONData {
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
         case .index(let index):
+            guard index < self.endIndex else {
+                return .failure(.indexOutOfBound(self))
+            }
             let member = self[index]
             
             return castAsJSONData(member)
