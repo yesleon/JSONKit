@@ -9,18 +9,18 @@
 
 
 
-enum Accessor {
+enum MemberAccessor {
     case index(Int), key(String)
 }
 
-extension Accessor: ExpressibleByStringLiteral {
+extension MemberAccessor: ExpressibleByStringLiteral {
     
     init(stringLiteral value: String) {
         self = .key(value)
     }
 }
 
-extension Accessor: ExpressibleByIntegerLiteral {
+extension MemberAccessor: ExpressibleByIntegerLiteral {
     
     init(integerLiteral value: Int) {
         self = .index(value)

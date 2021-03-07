@@ -1,5 +1,5 @@
 //
-//  ValueType.swift
+//  Data.swift
 //  JSONKit
 //
 //  Created by Li-Heng Hsu on 2021/3/7.
@@ -8,22 +8,22 @@
 import Foundation
 
 
-protocol ValueType {
-    func getMember(by accessor: Accessor) -> Result<ValueType, Error>
+protocol Data {
+    func getMember(by accessor: MemberAccessor) -> Result<Data, Error>
 }
 
-extension ValueType {
+extension Data {
     
-    subscript(index: Int) -> Result<ValueType, Error> {
+    subscript(index: Int) -> Result<Data, Error> {
         return getMember(by: .index(index))
     }
     
-    subscript(key: String) -> Result<ValueType, Error> {
+    subscript(key: String) -> Result<Data, Error> {
         return getMember(by: .key(key))
     }
     
-    subscript(path: [Accessor]) -> Result<ValueType, Error> {
-        var value = Result<ValueType, Error>.success(self)
+    subscript(path: [MemberAccessor]) -> Result<Data, Error> {
+        var value = Result<Data, Error>.success(self)
         
         path.forEach { accessor in
             value = value.getMember(by: accessor)
@@ -31,7 +31,7 @@ extension ValueType {
         return value
     }
     
-    func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
+    func getMember(by accessor: MemberAccessor) -> Result<Data, Error> {
         switch accessor {
         case .index:
             return .failure(.doesNotSupportSubscriptByIndex(self))
@@ -41,17 +41,17 @@ extension ValueType {
     }
 }
 
-extension Result where Success == ValueType, Failure == Error {
+extension Result where Success == Data, Failure == Error {
     
-    subscript(index: Int) -> Result<ValueType, Error> {
+    subscript(index: Int) -> Result<Data, Error> {
         return self.getMember(by: .index(index))
     }
     
-    subscript(key: String) -> Result<ValueType, Error> {
+    subscript(key: String) -> Result<Data, Error> {
         return self.getMember(by: .key(key))
     }
     
-    func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
+    func getMember(by accessor: MemberAccessor) -> Result<Data, Error> {
         switch accessor {
         case .index(let index):
             return self.flatMap { $0.getMember(by: .index(index)) }
@@ -60,7 +60,7 @@ extension Result where Success == ValueType, Failure == Error {
         }
     }
     
-    func get<T: ValueType>(as type: T.Type = T.self) throws -> T {
+    func get<T: Data>(as type: T.Type = T.self) throws -> T {
         let content = try get()
         guard let value = content as? T else {
             throw Error.typeDoesNotMatch(content)
@@ -69,46 +69,49 @@ extension Result where Success == ValueType, Failure == Error {
     }
 }
 
-extension String: ValueType { }
+extension String: Data { }
 
-extension Bool: ValueType { }
+extension Bool: Data { }
 
-extension Int: ValueType { }
+extension Int: Data { }
 
-extension Dictionary: ValueType where Key == String, Value == ValueType {
+extension Dictionary: Data where Key == String {
     
-    func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
+    func getMember(by accessor: MemberAccessor) -> Result<Data, Error> {
         switch accessor {
         case .index:
             return .failure(.doesNotSupportSubscriptByIndex(self))
         case .key(let key):
-            guard let value = self[key] else {
-                return .success(Optional<ValueType>.none)
+            guard let member = self[key] else {
+                return .success(Optional<Data>.none)
+            }
+            guard let value = member as? Data else {
+                return .failure(.memberIsNotJSONType(member))
             }
             return .success(value)
         }
     }
 }
 
-extension Array: ValueType where Element == ValueType {
+extension Array: Data {
     
-    func getMember(index: Int) -> Result<ValueType, Error> {
-        return .success(self[index])
-    }
-    
-    func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
+    func getMember(by accessor: MemberAccessor) -> Result<Data, Error> {
         switch accessor {
         case .index(let index):
-            return .success(self[index])
+            let member = self[index]
+            guard let value = member as? Data else {
+                return .failure(.memberIsNotJSONType(member))
+            }
+            return .success(value)
         case .key:
             return .failure(.doesNotSupportSubscriptByKey(self))
         }
     }
 }
 
-extension Optional: ValueType where Wrapped == ValueType {
+extension Optional: Data where Wrapped == Data {
     
-    func getMember(by accessor: Accessor) -> Result<ValueType, Error> {
+    func getMember(by accessor: MemberAccessor) -> Result<Data, Error> {
         if let value = self {
             return value.getMember(by: accessor)
         } else {

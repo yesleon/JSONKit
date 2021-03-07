@@ -7,7 +7,8 @@
 
 
 enum Error: Swift.Error {
-    case doesNotSupportSubscriptByIndex(ValueType)
-    case doesNotSupportSubscriptByKey(ValueType)
-    case typeDoesNotMatch(ValueType)
+    case doesNotSupportSubscriptByIndex(Data)
+    case doesNotSupportSubscriptByKey(Data)
+    case typeDoesNotMatch(Data)
+    case memberIsNotJSONType(Any)
 }
