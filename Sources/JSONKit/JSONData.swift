@@ -38,14 +38,6 @@ public extension String {
     }
 }
 
-public protocol JSONStringifiable { }
-public extension JSONStringifiable where Self: JSONData {
-    func stringified() throws -> String {
-        let data = try JSONSerialization.data(withJSONObject: self, options: [.fragmentsAllowed, .prettyPrinted])
-        return String(data: data, encoding: .utf8)!
-    }
-}
-
 public typealias JSONData = JSONMemberAccessing & JSONCasting & JSONStringifiable
 
 extension String: JSONData {
