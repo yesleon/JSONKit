@@ -9,9 +9,11 @@ import Foundation
 
 
 public protocol JSONStringifiable { }
+
 public extension JSONStringifiable where Self: JSONData {
-    func stringified() throws -> String {
-        let data = try JSONSerialization.data(withJSONObject: self, options: [.fragmentsAllowed, .prettyPrinted])
+    func stringified(prettyPrinted: Bool = true) throws -> String {
+        let options: JSONSerialization.WritingOptions = prettyPrinted ? [.fragmentsAllowed, .prettyPrinted] : .fragmentsAllowed
+        let data = try JSONSerialization.data(withJSONObject: self, options: options)
         return String(data: data, encoding: .utf8)!
     }
 }
