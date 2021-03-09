@@ -53,8 +53,8 @@ extension Dictionary: JSONData where Key == String {
     
     public func getMember(by accessor: JSONAccessor) -> Result<JSONData, JSONError> {
         switch accessor {
-        case .index:
-            return .failure(.doesNotSupportSubscriptByIndex(self))
+        case .index(let index):
+            return getMember(by: .key("\(index)"))
         case .key(let key):
             guard let member = self[key] else {
                 return .success(Optional<JSONData>.none)
@@ -77,8 +77,12 @@ extension Array: JSONData {
             let member = self[index]
             
             return castAsJSONData(member)
-        case .key:
-            return .failure(.doesNotSupportSubscriptByKey(self))
+        case .key(let key):
+            if let index = Int(key) {
+                return getMember(by: .index(index))
+            } else {
+                return .failure(.doesNotSupportSubscriptByKey(self))
+            }
         }
     }
 }
